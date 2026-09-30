@@ -1,37 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sistem Manajemen Operasional MBG (WEB-SIPGN)
 
-## Getting Started
+Sistem Manajemen Operasional MBG adalah platform web modern untuk mengelola profil Mitra dan SPPG. Dibangun dengan fokus pada kecepatan, keamanan, dan antarmuka yang sangat responsif, sistem ini memisahkan jalur otentikasi secara ketat antara **Admin** dan **User**.
 
-First, run the development server:
+## 🚀 Fitur Utama
+- **Keamanan Dua Portal (Dual-Portal Login)**:
+  - Portal Admin (`/secure-mbg`): Eksklusif hanya untuk super-admin.
+  - Portal Mitra/User (`/login`): Akses untuk pengguna biasa dan mitra yayasan.
+- **Manajemen Profil Lengkap**: Menampilkan informasi detail SPPG dan Yayasan dengan tata letak *(layout)* kartu profil modern.
+- **CRUD Pengguna Mutakhir**: Admin dapat menambahkan, mengedit, menghapus, atau menyalin (copy) akun pengguna secara dinamis melalui antarmuka *modal/pop-up* tanpa harus meninggalkan halaman.
+- **Anti-IDOR Protection**: Pengguna biasa (User) hanya dapat mengubah sandi dan *username* miliknya sendiri.
+- **Responsivitas Penuh**: Tata letak grid otomatis menyesuaikan dengan layar (Desktop, Tablet, maupun Ponsel).
 
+## 🛠️ Teknologi yang Digunakan
+- **Framework**: [Next.js 16 (App Router)](https://nextjs.org/)
+- **UI & Styling**: [Tailwind CSS v4](https://tailwindcss.com/) & [Lucide React](https://lucide.dev/) (Ikon)
+- **Otentikasi**: [NextAuth.js](https://next-auth.js.org/) (Credentials Provider)
+- **Database & ORM**: [PostgreSQL (via Neon)](https://neon.tech/) & [Prisma ORM](https://www.prisma.io/)
+
+## ⚙️ Persyaratan Sistem Lokal (Untuk Development)
+1. Node.js (Versi >= 20 disarankan)
+2. Akun database PostgreSQL (Bisa menggunakan [Neon DB](https://neon.tech/))
+
+## 📖 Cara Menjalankan Secara Lokal
+
+1. **Unduh (Clone) Repositori**
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Alvinhidayatullah/WEB-SIPGN.git
+cd WEB-SIPGN
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Instal Dependensi**
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **Atur Environment Variables**
+Buat file bernama `.env` di folder utama aplikasi Anda, lalu isi dengan kunci berikut:
+```env
+# Koneksi Database PostgreSQL
+DATABASE_URL="postgresql://<user>:<password>@<host>/<database>?sslmode=require"
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Kunci Rahasia Autentikasi
+NEXTAUTH_SECRET="buat_password_acak_disini_sesuka_hati"
+NEXTAUTH_URL="http://localhost:3000"
+```
 
-## Learn More
+4. **Persiapkan Database (Prisma)**
+Kirim struktur tabel ke *database* Anda menggunakan perintah:
+```bash
+npx prisma db push
+```
 
-To learn more about Next.js, take a look at the following resources:
+*(Opsional)* Anda juga dapat mengisi database dengan data percontohan awal:
+```bash
+npx prisma db seed
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+5. **Jalankan Aplikasi**
+```bash
+npm run dev
+```
+Buka peramban *(browser)* dan kunjungi `http://localhost:3000`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🌐 Panduan Deploy ke Vercel
+Kompilasi web ini telah dioptimalkan (*ESLint/TypeScript bypass*) agar dapat di-deploy 100% mulus di **Vercel**. 
+Langkah-langkah:
+1. Hubungkan repositori GitHub ini ke dasbor Vercel Anda.
+2. Di menu **Environment Variables**, pastikan Anda memasukkan `DATABASE_URL` (wajib memakai Postgres, bukan SQLite agar permanen) dan `NEXTAUTH_SECRET`.
+3. Klik **Deploy** dan Vercel akan otomatis menyusun aplikasinya hingga *online*.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
- 
+---
+*Dikembangkan secara khusus untuk Badan Gizi Nasional (MBG).*
