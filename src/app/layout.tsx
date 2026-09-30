@@ -7,6 +7,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Sistem Manajemen Operasional",
   description: "Profil Mitra & SPPG",
+  icons: {
+    icon: "/Logo-mbg.png"
+  }
 };
 
 export default function RootLayout({
