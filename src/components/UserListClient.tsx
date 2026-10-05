@@ -1,6 +1,6 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { Plus, X, RefreshCw, Trash2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Plus, X, RefreshCw, Trash2, Upload } from 'lucide-react';
 import ProfilDetailCard from './ProfilDetailCard';
 import EditProfileModal from './EditProfileModal';
 import Image from 'next/image';
@@ -19,6 +19,8 @@ export default function UserListClient({ isAdmin }: { isAdmin: boolean }) {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Modal states
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
@@ -90,6 +92,69 @@ export default function UserListClient({ isAdmin }: { isAdmin: boolean }) {
     }
   };
 
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    try {
+      const XLSX = await import('xlsx');
+      const reader = new FileReader();
+      reader.onload = async (evt) => {
+        const bstr = evt.target?.result;
+        const wb = XLSX.read(bstr, { type: 'binary' });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(ws);
+
+        if (data.length === 0) {
+          alert('File Excel kosong atau tidak terbaca.');
+          setIsImporting(false);
+          return;
+        }
+
+        // Map column names dynamically if they differ, but we assume exact mapping or fallback
+        const formattedData = data.map((row: any) => ({
+          username: row['Username'] || row['username'] || undefined,
+          namaSppg: row['Nama SPPG'] || row['namaSppg'] || row['Nama'] || undefined,
+          kodeSppg: row['Kode SPPG'] || row['kodeSppg'] || undefined,
+          nomorBaVerval: row['No BA Verval'] || row['nomorBaVerval'] || undefined,
+          provinsi: row['Provinsi'] || row['provinsi'] || undefined,
+          kabKota: row['Kab/Kota'] || row['kabKota'] || undefined,
+          kecamatan: row['Kecamatan'] || row['kecamatan'] || undefined,
+          kelurahanDesa: row['Kelurahan'] || row['kelurahanDesa'] || undefined,
+          alamat: row['Alamat'] || row['alamat'] || undefined,
+          statusOperasional: row['Status'] || row['statusOperasional'] || undefined,
+        }));
+
+        const res = await fetch('/api/users/import', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ users: formattedData })
+        });
+        const result = await res.json();
+
+        if (res.ok) {
+          let msg = `Berhasil mengimpor ${result.successCount} data akun & profil.\n(Default password: mbg123)`;
+          if (result.errors && result.errors.length > 0) {
+            msg += `\n\nBeberapa data gagal diproses:\n${result.errors.slice(0, 5).join('\n')}`;
+            if (result.errors.length > 5) msg += `\n...dan ${result.errors.length - 5} error lainnya.`;
+          }
+          alert(msg);
+          fetchUsers();
+        } else {
+          alert(result.error || 'Gagal mengimpor data.');
+        }
+        setIsImporting(false);
+      };
+      reader.readAsBinaryString(file);
+    } catch (error) {
+      alert('Error membaca file Excel.');
+      setIsImporting(false);
+    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   const openCreateModal = () => {
     setEditingProfileData({ username: '', password: '' });
     setModalMode('create');
@@ -144,12 +209,28 @@ export default function UserListClient({ isAdmin }: { isAdmin: boolean }) {
             </>
           )}
           {isAdmin && (
-            <button 
-              onClick={openCreateModal}
-              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium shadow-sm"
-            >
-              <Plus size={16} /> Buat Akun & Profil Baru
-            </button>
+            <div className="flex gap-2">
+              <input 
+                type="file" 
+                accept=".xlsx, .xls" 
+                className="hidden" 
+                ref={fileInputRef} 
+                onChange={handleImport} 
+              />
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isImporting}
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 text-sm font-medium shadow-sm disabled:opacity-50"
+              >
+                <Upload size={16} /> {isImporting ? 'Memproses...' : 'Import Excel'}
+              </button>
+              <button 
+                onClick={openCreateModal}
+                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium shadow-sm"
+              >
+                <Plus size={16} /> Buat Akun & Profil Baru
+              </button>
+            </div>
           )}
         </div>
       </div>
