@@ -96,6 +96,8 @@ export async function POST(request: Request) {
       profilSppgCreate = {
         create: {
           ...sppgData,
+          posisiLatitude: sppgData.posisiLatitude ? (isNaN(parseFloat(sppgData.posisiLatitude)) ? null : parseFloat(sppgData.posisiLatitude)) : null,
+          posisiLongitude: sppgData.posisiLongitude ? (isNaN(parseFloat(sppgData.posisiLongitude)) ? null : parseFloat(sppgData.posisiLongitude)) : null,
           tanggalBaVerval: sppgData.tanggalBaVerval ? new Date(sppgData.tanggalBaVerval) : new Date(),
           tanggalOperasional: sppgData.tanggalOperasional ? new Date(sppgData.tanggalOperasional) : new Date(),
           idSppg: `SPPG-${Date.now()}-${Math.floor(Math.random() * 1000)}`,

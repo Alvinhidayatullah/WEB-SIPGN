@@ -59,6 +59,8 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
 
       const nestedOps = {
         ...sppgData,
+        posisiLatitude: sppgData.posisiLatitude ? (isNaN(parseFloat(sppgData.posisiLatitude)) ? null : parseFloat(sppgData.posisiLatitude)) : null,
+        posisiLongitude: sppgData.posisiLongitude ? (isNaN(parseFloat(sppgData.posisiLongitude)) ? null : parseFloat(sppgData.posisiLongitude)) : null,
         tanggalBaVerval: sppgData.tanggalBaVerval ? new Date(sppgData.tanggalBaVerval) : undefined,
         tanggalOperasional: sppgData.tanggalOperasional ? new Date(sppgData.tanggalOperasional) : undefined,
         yayasan: yayasan ? { upsert: { create: sanitize(yayasan), update: sanitize(yayasan) } } : undefined,

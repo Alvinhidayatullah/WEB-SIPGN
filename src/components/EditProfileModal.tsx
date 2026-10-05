@@ -129,7 +129,8 @@ export default function EditProfileModal({
       if (res.ok) {
         onSuccess();
       } else {
-        alert('Gagal menyimpan profil.');
+        const errorData = await res.json().catch(() => ({}));
+        alert(`Gagal menyimpan profil. ${errorData.error || ''}`);
       }
     } catch (error) {
       alert('Terjadi kesalahan.');
