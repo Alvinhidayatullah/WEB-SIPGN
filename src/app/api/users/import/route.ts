@@ -37,7 +37,7 @@ export async function POST(request: Request) {
           continue;
         }
 
-        const sppgData = {
+        const sppgData: any = {
           namaSppg: row.namaSppg || '-',
           kodeSppg: row.kodeSppg || `KODE-${ts}-${i}`,
           idSppg: row.idSppg || `SPPG-${ts}-${i}`,
@@ -51,9 +51,81 @@ export async function POST(request: Request) {
           kelurahanDesa: row.kelurahanDesa || '-',
           alamat: row.alamat || '-',
           kodePos: row.kodePos?.toString() || '-',
+          posisiLatitude: row.posisiLatitude || null,
+          posisiLongitude: row.posisiLongitude || null,
           jenisBangunan: row.jenisBangunan || '-',
           jenisSppg: row.jenisSppg || '-',
         };
+
+        if (row.kasatpelNama) {
+          sppgData.kasatpel = {
+            create: {
+              nama: row.kasatpelNama,
+              email: row.kasatpelEmail || '-',
+              noHp: row.kasatpelNoHp || '-'
+            }
+          };
+        }
+
+        if (row.mitraJenis || row.mitraNama) {
+          sppgData.mitraEksternal = {
+            create: {
+              jenisMitra: row.mitraJenis || '-',
+              namaMitra: row.mitraNama || '-',
+              namaPimpinan: row.mitraPimpinan || '-',
+              noHp: row.mitraNoHp || '-',
+              email: row.mitraEmail || null,
+              bentukDukungan: row.mitraDukungan || '-',
+              provinsi: row.mitraProvinsi || '-',
+              kabKota: row.mitraKabKota || '-',
+              kecamatan: row.mitraKecamatan || '-',
+              kelurahanDesa: row.mitraKelurahan || '-',
+              alamat: row.mitraAlamat || '-',
+              kodePos: row.mitraKodePos || '-'
+            }
+          };
+        }
+
+        if (row.yayasanNama) {
+          sppgData.yayasan = {
+            create: {
+              namaYayasan: row.yayasanNama,
+              npwp: row.yayasanNpwp || '-',
+              provinsi: row.yayasanProvinsi || '-',
+              kabKota: row.yayasanKabKota || '-',
+              kecamatan: row.yayasanKecamatan || '-',
+              kelurahanDesa: row.yayasanKelurahan || '-',
+              alamat: row.yayasanAlamat || '-',
+              kodePos: row.yayasanKodePos || '-',
+              email: row.yayasanEmail || '-',
+              teleponHp: row.yayasanTelepon || null
+            }
+          };
+        }
+
+        if (row.bankNama || row.bankNomor) {
+          sppgData.rekeningBank = {
+            create: {
+              namaBank: row.bankNama || '-',
+              nomorRekening: row.bankNomor || '-',
+              namaPemilikRekening: row.bankPemilik || '-',
+              namaBankVirtualAccount: row.bankVaNamaBank || '-',
+              nomorVirtualAccount: row.bankVaNomor || '-',
+              namaVirtualAccount: row.bankVaNama || '-'
+            }
+          };
+        }
+
+        if (row.perwakilanNama) {
+          sppgData.perwakilanYayasan = {
+            create: {
+              namaPerwakilan: row.perwakilanNama,
+              nik: row.perwakilanNik || '-',
+              email: row.perwakilanEmail || '-',
+              noHp: row.perwakilanNoHp || '-'
+            }
+          };
+        }
 
         await prisma.user.create({
           data: {
