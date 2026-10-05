@@ -22,6 +22,20 @@ export async function POST(request: Request) {
     const defaultPassword = await bcrypt.hash('mbg123', 10);
     const ts = Date.now();
 
+    const parseDate = (d: any) => {
+      if (!d) return new Date();
+      if (typeof d === 'number') return new Date(Math.round((d - 25569) * 86400 * 1000));
+      if (typeof d === 'string') {
+        const p = d.split(/[/-]/);
+        if (p.length === 3 && parseInt(p[0]) > 12) {
+          const dt = new Date(`${p[2]}-${p[1]}-${p[0]}`);
+          if (!isNaN(dt.getTime())) return dt;
+        }
+      }
+      const dt = new Date(d);
+      return isNaN(dt.getTime()) ? new Date() : dt;
+    };
+
     let successCount = 0;
     let errors = [];
 
@@ -42,9 +56,9 @@ export async function POST(request: Request) {
           kodeSppg: row.kodeSppg || `KODE-${ts}-${i}`,
           idSppg: row.idSppg || `SPPG-${ts}-${i}`,
           nomorBaVerval: row.nomorBaVerval || '-',
-          tanggalBaVerval: row.tanggalBaVerval ? new Date(row.tanggalBaVerval) : new Date(),
+          tanggalBaVerval: parseDate(row.tanggalBaVerval),
           statusOperasional: row.statusOperasional || 'Beroperasi',
-          tanggalOperasional: row.tanggalOperasional ? new Date(row.tanggalOperasional) : new Date(),
+          tanggalOperasional: parseDate(row.tanggalOperasional),
           provinsi: row.provinsi || '-',
           kabKota: row.kabKota || '-',
           kecamatan: row.kecamatan || '-',
