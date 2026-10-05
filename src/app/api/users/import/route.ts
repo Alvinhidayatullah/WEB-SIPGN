@@ -141,16 +141,60 @@ export async function POST(request: Request) {
           };
         }
 
-        await prisma.user.create({
-          data: {
-            username,
-            password: defaultPassword,
-            role: 'USER',
-            profilSppg: {
-              create: sppgData
-            }
+        const existingUser = await prisma.user.findUnique({
+          where: { username }
+        });
+
+        const existingSppg = await prisma.profilSppg.findFirst({
+          where: {
+            OR: [
+              { idSppg: sppgData.idSppg },
+              { kodeSppg: sppgData.kodeSppg }
+            ]
           }
         });
+
+        // Detach and delete existing SPPG if it conflicts with the new data
+        if (existingSppg) {
+          await prisma.user.updateMany({
+            where: { profilSppgId: existingSppg.id },
+            data: { profilSppgId: null }
+          });
+          await prisma.profilSppg.delete({ where: { id: existingSppg.id } });
+        }
+
+        // Overwrite existing user or create a new one
+        if (existingUser) {
+          // Clean up old user's SPPG if they had a different one
+          if (existingUser.profilSppgId && existingUser.profilSppgId !== existingSppg?.id) {
+            await prisma.user.update({
+              where: { id: existingUser.id },
+              data: { profilSppgId: null }
+            });
+            await prisma.profilSppg.delete({ where: { id: existingUser.profilSppgId } });
+          }
+
+          await prisma.user.update({
+            where: { id: existingUser.id },
+            data: {
+              password: defaultPassword,
+              profilSppg: {
+                create: sppgData
+              }
+            }
+          });
+        } else {
+          await prisma.user.create({
+            data: {
+              username,
+              password: defaultPassword,
+              role: 'USER',
+              profilSppg: {
+                create: sppgData
+              }
+            }
+          });
+        }
         successCount++;
       } catch (err: any) {
         errors.push(`Baris ${i+1}: Gagal memproses data (${err.message.substring(0, 50)}...)`);
