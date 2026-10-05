@@ -84,8 +84,8 @@ export async function POST(request: Request) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     let profilSppgCreate = undefined;
-    if (Object.keys(profilData).length > 0) {
-      const { yayasan, rekeningBank, kasatpel, mitraEksternal, perwakilanYayasan, createdAt, updatedAt, idSppg, ...sppgData } = profilData;
+    if (Object.keys(profilData).length > 0 && profilData.namaSppg) {
+      const { yayasan, rekeningBank, kasatpel, mitraEksternal, perwakilanYayasan, createdAt, updatedAt, idSppg, kodeSppg, ...sppgData } = profilData;
       
       const sanitize = (data: any) => {
         if (!data) return undefined;
@@ -96,7 +96,10 @@ export async function POST(request: Request) {
       profilSppgCreate = {
         create: {
           ...sppgData,
-          idSppg: idSppg || `SPPG-${Date.now()}`,
+          tanggalBaVerval: sppgData.tanggalBaVerval ? new Date(sppgData.tanggalBaVerval) : new Date(),
+          tanggalOperasional: sppgData.tanggalOperasional ? new Date(sppgData.tanggalOperasional) : new Date(),
+          idSppg: `SPPG-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          kodeSppg: `KODE-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
           yayasan: yayasan ? { create: sanitize(yayasan) } : undefined,
           rekeningBank: rekeningBank ? { create: sanitize(rekeningBank) } : undefined,
           kasatpel: kasatpel ? { create: sanitize(kasatpel) } : undefined,

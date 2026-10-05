@@ -59,6 +59,8 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
 
       const nestedOps = {
         ...sppgData,
+        tanggalBaVerval: sppgData.tanggalBaVerval ? new Date(sppgData.tanggalBaVerval) : undefined,
+        tanggalOperasional: sppgData.tanggalOperasional ? new Date(sppgData.tanggalOperasional) : undefined,
         yayasan: yayasan ? { upsert: { create: sanitize(yayasan), update: sanitize(yayasan) } } : undefined,
         rekeningBank: rekeningBank ? { upsert: { create: sanitize(rekeningBank), update: sanitize(rekeningBank) } } : undefined,
         kasatpel: kasatpel ? { upsert: { create: sanitize(kasatpel), update: sanitize(kasatpel) } } : undefined,
@@ -144,7 +146,7 @@ export async function DELETE(request: Request, props: { params: Promise<{ id: st
       });
 
       if (user.profilSppgId) {
-        await prisma.profilSppg.delete({
+        await prisma.profilSppg.deleteMany({
           where: { id: user.profilSppgId }
         });
       }
