@@ -217,6 +217,13 @@ export default function UserListClient({ isAdmin }: { isAdmin: boolean }) {
                 ref={fileInputRef} 
                 onChange={handleImport} 
               />
+              <a 
+                href="/Template_Import_MBG.xlsx"
+                download
+                className="flex items-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 bg-white rounded-md hover:bg-slate-50 text-sm font-medium shadow-sm"
+              >
+                Unduh Template
+              </a>
               <button 
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isImporting}
